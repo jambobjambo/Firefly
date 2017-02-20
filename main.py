@@ -18,7 +18,7 @@ n_nodes_hl3 = 1500
 
 n_classes = 3
 batch_size = 100
-hm_epochs = 10
+hm_epochs = 50
 
 x = tf.placeholder('float')
 y = tf.placeholder('float')
@@ -39,7 +39,10 @@ output_layer = {'f_fum':None,
                 'weight':tf.Variable(tf.random_normal([n_nodes_hl3, n_classes])),
                 'bias':tf.Variable(tf.random_normal([n_classes])),}
 
+
+# Nothing changes
 def neural_network_model(data):
+
     l1 = tf.add(tf.matmul(data,hidden_1_layer['weight']), hidden_1_layer['bias'])
     l1 = tf.nn.relu(l1)
 
@@ -54,31 +57,31 @@ def neural_network_model(data):
     return output
 
 def train_neural_network(x):
-    prediction = neural_network_model(x)
-    cost = tf.reduce_mean( tf.nn.softmax_cross_entropy_with_logits(prediction,y) )
-    optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
+	prediction = neural_network_model(x)
+	cost = tf.reduce_mean( tf.nn.softmax_cross_entropy_with_logits(prediction,y) )
+	optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
+	with tf.Session() as sess:
+		sess.run(tf.global_variables_initializer())
 
-        for epoch in range(hm_epochs):
-            epoch_loss = 0
-            i = 0
-            while i < len(train_x):
-                start = i
-                end = i+batch_size
-                batch_x = np.array(train_x[start:end])
-                batch_y = np.array(train_y[start:end])
-                _, c = sess.run([optimizer, cost], feed_dict={x: batch_x, y: batch_y})
+		for epoch in range(hm_epochs):
+			epoch_loss = 0
+			i=0
+			while i < len(train_x):
+				start = i
+				end = i+batch_size
+				batch_x = np.array(train_x[start:end])
+				batch_y = np.array(train_y[start:end])
 
-                epoch_loss += c
-                i += batch_size
+				_, c = sess.run([optimizer, cost], feed_dict={x: batch_x,
+				                                              y: batch_y})
+				epoch_loss += c
+				i+=batch_size
+			print('Epoch', epoch+1, 'completed out of',hm_epochs,'loss:',epoch_loss)
+		correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+		accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+		print("Accuracy:", accuracy.eval({x: test_x, y: test_y}))
 
-            print('Epoch', epoch+1, 'completed out of',hm_epochs,'loss:',epoch_loss)
-
-        correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-        print('Accuracy:',accuracy.eval({x:test_x, y:test_y}))
 
 train_neural_network(x)
 '''gen_new_data = True
