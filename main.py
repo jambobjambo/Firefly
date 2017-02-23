@@ -12,13 +12,13 @@ def generate_training_data():
 train_x, train_y, test_x, test_y = DataConv.create_feature_sets_and_labels()
 
 #Step 3 | Feed data to machine learning model
-n_nodes_hl1 = 1500
-n_nodes_hl2 = 1500
-n_nodes_hl3 = 1500
+n_nodes_hl1 = 2000
+n_nodes_hl2 = 2000
+n_nodes_hl3 = 2000
 
-n_classes = 3
+n_classes = len(train_y[0])
 batch_size = 100
-hm_epochs = 50
+hm_epochs = 200
 
 x = tf.placeholder('float')
 y = tf.placeholder('float')
@@ -42,19 +42,18 @@ output_layer = {'f_fum':None,
 
 # Nothing changes
 def neural_network_model(data):
+	l1 = tf.add(tf.matmul(data,hidden_1_layer['weight']), hidden_1_layer['bias'])
+	l1 = tf.nn.relu(l1)
 
-    l1 = tf.add(tf.matmul(data,hidden_1_layer['weight']), hidden_1_layer['bias'])
-    l1 = tf.nn.relu(l1)
+	l2 = tf.add(tf.matmul(l1,hidden_2_layer['weight']), hidden_2_layer['bias'])
+	l2 = tf.nn.relu(l2)
 
-    l2 = tf.add(tf.matmul(l1,hidden_2_layer['weight']), hidden_2_layer['bias'])
-    l2 = tf.nn.relu(l2)
+	l3 = tf.add(tf.matmul(l2,hidden_3_layer['weight']), hidden_3_layer['bias'])
+	l3 = tf.nn.relu(l3)
 
-    l3 = tf.add(tf.matmul(l2,hidden_3_layer['weight']), hidden_3_layer['bias'])
-    l3 = tf.nn.relu(l3)
+	output = tf.matmul(l3,output_layer['weight']) + output_layer['bias']
 
-    output = tf.matmul(l3,output_layer['weight']) + output_layer['bias']
-
-    return output
+	return output
 
 def train_neural_network(x):
 	prediction = neural_network_model(x)
@@ -72,7 +71,8 @@ def train_neural_network(x):
 				end = i+batch_size
 				batch_x = np.array(train_x[start:end])
 				batch_y = np.array(train_y[start:end])
-
+				'''for batch in batch_x:
+					print(len(batch_x[0]))'''
 				_, c = sess.run([optimizer, cost], feed_dict={x: batch_x,
 				                                              y: batch_y})
 				epoch_loss += c
