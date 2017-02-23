@@ -1,4 +1,6 @@
-import DataStorage.training_data_convert as DataConv
+import sys
+sys.path.append("..")
+from Firefly import DataStorage.training_data_convert as DataConv
 import tensorflow as tf
 import numpy as np
 
